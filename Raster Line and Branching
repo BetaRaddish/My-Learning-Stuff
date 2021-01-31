@@ -1,0 +1,59 @@
+/* 
+=====================================================================================================================
+Simple program to increment the screen and border colour at certain values
+--------------------------------------------------------------------------
+
+This program uses the raster location and when it hits line 255 it will increment a counter. In turn, when this
+counter hits 60 it will increment the screen and bordr colour.
+
+By @BetaRaddish
+31/1/2021
+Using Kick Assembler
+=====================================================================================================================
+*/
+
+*=$0800 //Store program at memory location 2048
+
+BasicUpstart2(Start) // creates a basic autoloader using label start as the start of the program
+
+//Define some contants
+.const rasterLocation=$d012 //Memory location 53226 - Stores the current raster line
+.const border=$d020 //border memory location
+.const screen=$d021 //screen memory location
+.const black=$00 //black colour
+.const white=$01 //white colour
+.const cls=$e544 //Kernal clear screen subroutine
+
+/* 
+=====================================================================================================================
+My Program starts here
+=====================================================================================================================
+*/
+
+Start: //program start
+        //blank the screen and init some values
+        jsr cls //call the clear screen subroutine
+        lda #black //load accumulator with black
+        sta border //store to border colour memory address
+        lda #white //load accumulator with white
+        sta screen //store to screen colour memory location
+        ldx $0 // load x with zero
+
+RasterCheck:
+        lda rasterLocation //load the accumulator with the current raster location from $d012
+        cmp #$ff //compare it to the value 255
+        bne RasterCheck //if it does not equal 255 send the program back to the start of RasterCheck
+        inx //otherwise increment x 
+        cpx $3c //compare x to 60
+        bne RasterCheck //if it is not equal to 60 then send the program back to the start of RasterCheck
+        inc screen //othewise increment the screen colour location
+        inc border //increment the border screen colour
+        ldx $0  //load x with zero again
+        jsr RasterCheck //send the program back to RasterCeck - Creates a loop.
+
+
+/* 
+=====================================================================================================================
+End of program
+=====================================================================================================================
+*/
